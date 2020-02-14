@@ -2,8 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Web;
+    using System.Device.Location;
 
     public static class WeatherCalculator
     {
@@ -39,11 +38,12 @@
 
             return ImprimirValores(sequia, lluvia, lluviaMaxima, condOptima);
         }
+
         public static string GetWeather(int day)
         {
-            var F = new coordinates();
-            var B = new coordinates();
-            var V = new coordinates();
+            var F = new Coords();
+            var B = new Coords();
+            var V = new Coords();
             //obtengo las coordenadas para los tres planetas en el día actual
             GetCoordinates(day, out F, out B, out V);
 
@@ -102,27 +102,33 @@
             return result;
         }
 
-        public static bool TriangleIsMax(coordinates F, coordinates B, coordinates V)
+        public static bool TriangleIsMax(Coords F, Coords B, Coords V)
         {
-            var ladoA = Math.Atan(System.Math.Abs(F.X - B.X) / System.Math.Abs(F.Y - B.Y));
-            var ladoB = Math.Atan(System.Math.Abs(B.X - V.X) / System.Math.Abs(B.Y - V.Y));
-            var ladoC = Math.Atan(System.Math.Abs(V.X - F.X) / System.Math.Abs(V.Y - F.Y));
-            return ladoA == ladoB && ladoB == ladoC;
+            // es máximo si todos sus lados son iguales
+            var sa = GetDistance(F, B);
+            var sb = GetDistance(B, V);
+            var sc = GetDistance(V, F);
+            return Math.Round(sa) == Math.Round(sb) && Math.Round(sb) == Math.Round(sc);
         }
 
-        public static int Area(coordinates a, coordinates b, coordinates c)
+        public static double GetDistance(Coords a, Coords b)
+        {
+            return Math.Sqrt(Math.Pow(b.X - a.X, 2) + Math.Pow(b.Y - a.Y, 2));
+        }
+
+        public static double Area(Coords a, Coords b, Coords c)
         {
             // devuelvo el área en entero para hacer menos precisa la comparación y obtener
             // comparaciones de áreas similares como idénticas sino la inclusión del sol por comparación
             // de áreas me va a dar siempre falso por redondeos de operaciones
-            return (int)Math.Abs((a.X * (b.Y - c.Y) + b.X * (c.Y - a.Y) + c.X * (a.Y - b.Y)) / 2);
+            return Math.Abs((a.X * (b.Y - c.Y) + b.X * (c.Y - a.Y) + c.X * (a.Y - b.Y)) / 2);
         }
-        
-        public static bool TriangleIncludesSun(coordinates F, coordinates B, coordinates V)
+
+        public static bool TriangleIncludesSun(Coords F, Coords B, Coords V)
         {
             // el eje central está incluído en el triángulo la suma de las áreas de los triángulos con 
             // el centro es igual al área del triángulo que forman los puntos
-            var centerCoords = new coordinates
+            var centerCoords = new Coords
             {
                 X = 0,
                 Y = 0
@@ -131,57 +137,52 @@
             var a1 = Area(centerCoords, B, V);
             var a2 = Area(F, centerCoords, V);
             var a3 = Area(F, B, centerCoords);
-            return A == (a1 + a2 + a3);
+            return Math.Round(A, 2) == Math.Round(a1 + a2 + a3, 2);
         }
 
-        public static double AreaOfTriangle(coordinates a, coordinates b, coordinates c)
+        public static bool AlignedWithSun(Coords F, Coords B, Coords V)
         {
-            return ((a.X - b.X) * (b.Y - c.Y) - (b.X - c.X) * (a.Y - b.Y) / 2);
-        }
-
-        public static bool AlignedWithSun(coordinates F, coordinates B, coordinates V)
-        {
-            var oo = new coordinates
+            var o = new Coords
             {
                 X = 0,
                 Y = 0
             };
-            return Aligned(oo, B, V) && Aligned(F, oo, V) && Aligned(F, B, oo);
+            return Aligned(o, B, V) && Aligned(F, o, V) && Aligned(F, B, o);
         }
 
-        public static bool Aligned(coordinates F, coordinates B, coordinates V)
+        public static bool Aligned(Coords F, Coords B, Coords V)
         {
-            return AreaOfTriangle(F, B, V) == 0;
+            return Math.Round(Area(F, B, V)) == 0;
         }
 
-        public static void GetCoordinates(int day, out coordinates F, out coordinates B, out coordinates V)
+        public static void GetCoordinates(int day, out Coords F, out Coords B, out Coords V)
         {
             const int rF = 500;
             const int rB = 2000;
             const int rV = 1000;
-            int aF;
-            int aB;
-            int aV;
-            Math.DivRem(day * 1, 360, out aF);
-            Math.DivRem(day * 3, 360, out aB);
-            Math.DivRem(day * 5, 360, out aV);
 
+            // evalúo a que ángulo con respecto a cero se trata si ya excedí los 360
+            Math.DivRem(day * 1, 360, out int aF);
+            Math.DivRem(day * 3, 360, out int aB);
+            Math.DivRem(day * 5, 360, out int aV);
+
+            // obtengo las coordenadas para cada planeta
             F = GetCoordinatesFor(aF, rF);
             B = GetCoordinatesFor(aB, rB);
             V = GetCoordinatesFor(aV, rV);
         }
 
-        public static coordinates GetCoordinatesFor(int angle, int radius)
+        public static Coords GetCoordinatesFor(int angle, int radius)
         {
-            var result = new coordinates
+            var result = new Coords
             {
-                X = Math.Cos(angle) * radius,
-                Y = Math.Sin(angle) * radius
+                X = Math.Cos(angle * Math.PI / 180) * radius,
+                Y = Math.Sin(angle * Math.PI / 180) * radius
             };
             return result;
         }
 
-        public class coordinates
+        public class Coords
         {
             public double X { get; set; }
             public double Y { get; set; }

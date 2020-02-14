@@ -14,7 +14,7 @@ namespace WetherAPI.Controllers
         [HttpGet]
         [AcceptVerbs("Get")]
         [Route("api/Values/Clima/{dia}")]
-        public dynamic Clima(int dia)
+        public string Clima(int dia)
         {
             Console.WriteLine("clima");
             var result = new WeatherCalculator.dayData
