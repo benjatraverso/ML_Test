@@ -17,10 +17,11 @@ namespace WetherAPI.Controllers
         public string Clima(int dia)
         {
             Console.WriteLine("clima");
+            var k = new WeatherCalculator.MaxRain();
             var result = new WeatherCalculator.dayData
             {
                 dia = dia,
-                clima = WeatherCalculator.GetWeather(dia)
+                clima = WeatherCalculator.GetWeather(dia, ref k)
             };
 
             return JsonConvert.SerializeObject(result);

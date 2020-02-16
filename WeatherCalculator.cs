@@ -1,31 +1,37 @@
-﻿namespace WetherAPI
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Device.Location;
+﻿using System;
 
+namespace WetherAPI
+{
     public static class WeatherCalculator
     {
+        public class MaxRain
+        {
+            public int Day { get; set; }
+            public double Perim { get; set; }
+
+            public MaxRain()
+            {
+                Day = 0;
+                Perim = 0;
+            }
+        }
+        
         public static string GetNextTenYearsReport()
         {
             // evalúo de acá a 10 años
             var lluvia = 0;
             var sequia = 0;
             var condOptima = 0;
-            var lluviaMaxima = new List<DateTime>();
+            var DiaLluviaMaxima = new MaxRain();
 
             // se asume dos años biciestos en el período
             for (int i = 0; i <= (360 + 2) * 10; i++)
             {
-                switch (GetWeather(i))
+                switch (GetWeather(i, ref DiaLluviaMaxima))
                 {
                     // se asume los días de lluvia máxima también deben ser contados como días de lluvia
                     case "lluvia":
                         lluvia++;
-                        break;
-                    case "lluviaMaxima":
-                        lluvia++;
-                        lluviaMaxima.Add(DateTime.Now.AddDays(i));
                         break;
                     case "sequia":
                         sequia++;
@@ -36,10 +42,10 @@
                 }
             }
 
-            return ImprimirValores(sequia, lluvia, lluviaMaxima, condOptima);
+            return ImprimirValores(sequia, lluvia, DiaLluviaMaxima.Day, condOptima);
         }
 
-        public static string GetWeather(int day)
+        public static string GetWeather(int day, ref MaxRain max)
         {
             var F = new Coords();
             var B = new Coords();
@@ -67,16 +73,14 @@
                 //no están alineados así que forman un triángulo
                 if (TriangleIncludesSun(F, B, V))
                 {
-                    if (TriangleIsMax(F, B, V))
+                    var per = Perimetro(F, B, V);
+                    if (max.Perim < per)
                     {
-                        // si además el triángulo es máximo es día de lluvia máxima
-                        //acumulo la fecha en la lista
-                        return "lluviaMaxima";
+                        max.Perim = per;
+                        max.Day = day;
                     }
-                    else
-                    {
-                        return "lluvia";
-                    }
+
+                    return "lluvia";
                 }
                 else
                 {
@@ -87,28 +91,24 @@
             }
         }
 
-        public static string ImprimirValores(int sequia, int lluvia, List<DateTime> lluviaMaxima, int condOptima)
+        public static string ImprimirValores(int sequia, int lluvia, int lluviaMaxima, int condOptima)
         {
             var result = "¿Cuántos períodos de sequía habrá? Respuesta: " + sequia + Environment.NewLine;
             result += "¿Cuántos períodos de lluvia habrá y qué día será el pico máximo de lluvia? Respuesta: " +
-                lluvia + " con sus picos en los días: " + Environment.NewLine;
-            foreach (var fecha in lluviaMaxima)
-            {
-                result += fecha.ToString() + Environment.NewLine;
-            }
+                lluvia + " con su pico en el días " + lluviaMaxima + ": " + DateTime.Now.AddDays(lluviaMaxima) + Environment.NewLine;
             result += "¿Cuántos períodos de condiciones óptimas de presión y temperatura habrá? Respuesta: " +
                 condOptima + Environment.NewLine;
 
             return result;
         }
 
-        public static bool TriangleIsMax(Coords F, Coords B, Coords V)
+        public static double Perimetro(Coords F, Coords B, Coords V)
         {
             // es máximo si todos sus lados son iguales
             var sa = GetDistance(F, B);
             var sb = GetDistance(B, V);
             var sc = GetDistance(V, F);
-            return Math.Round(sa) == Math.Round(sb) && Math.Round(sb) == Math.Round(sc);
+            return sa + sb + sc;
         }
 
         public static double GetDistance(Coords a, Coords b)
