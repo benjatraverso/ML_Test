@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Scanner.Tests
+﻿namespace Scanner.Tests
 {
+    using System.Collections.Generic;
+
     internal class Test
     {
         internal bool RunAll()
@@ -24,10 +23,10 @@ namespace Scanner.Tests
             var diagonalMutant = new List<string>() { "ATGCGA", "CAGTGC", "TTATTT", "AGTCGG", "GTGTCA", "TCACTG" };
             //this one is the "not mutant" given example
             var notMutant = new List<string>() { "ATGCGA", "CAGTGC", "TTATTT", "AGACGG", "GCGTCA", "TCACTG" };
-            bValid = bValid && Helpers.Helper.Scan(diagonalMutant);
-            bValid = bValid && Helpers.Helper.Scan(fastMutantEval);
-            bValid = bValid && Helpers.Helper.Scan(mutant);
-            bValid = bValid && !Helpers.Helper.Scan(notMutant);
+            bValid = bValid && Scan.IsMutant(diagonalMutant);
+            bValid = bValid && Scan.IsMutant(fastMutantEval);
+            bValid = bValid && Scan.IsMutant(mutant);
+            bValid = bValid && !Scan.IsMutant(notMutant);
             return bValid;
         }
     }

@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace Scanner.Helpers
+﻿namespace Scanner
 {
-    public static class Helper
+    using System.Collections.Generic;
+    using System.Linq;
+
+    public static class Scan
     {
-        internal static bool Scan(List<string> dna)
+        internal static bool IsMutant(List<string> dna)
         {
             var match = 0;
             var row = 0;
@@ -42,7 +42,7 @@ namespace Scanner.Helpers
             // check if we can have a perpendicular secuence
             if (dna.Length - y > 3)
             {
-                if(IsSec(dna, c, x, y, 0, -1, 1))
+                if (IsSec(dna, c, x, y, 0, -1, 1))
                 {
                     match++;
                 }
