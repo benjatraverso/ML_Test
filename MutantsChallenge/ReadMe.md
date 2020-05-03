@@ -23,3 +23,15 @@ Para el primero la secuencia de ADN se debe pasar por body, se dejan debajo cuat
 Cada llamada al endpoint /mutant/ almacena en memoria (se puede migrar a una base SQL) el resultado para la secuencia consultada (sólo una vez), hidratando así la base de datos que consume el endpoint /stats/
 El segundo enpoint mencionado devuelve de la base de datos el total de resultados obtenidos para cada uno de los tipos de ADN y un ratio.
 ### Se incluyen imágenes de postman para mutante - humano - stats
+
+## Hosting
+La app fue hosteada en AppEngine y la url de acceso es la siguiente:
+* http://ml-test-268211.appspot.com
+Siendo los siguientes endpoints los que expone la misma:
+* http://ml-test-268211.appspot.com/api/Scan/stats
+* http://ml-test-268211.appspot.com/api/Scan/mutant
+
+# Aclaraciones
+Se mantuvo el repositorio existente para buscar orden por lo que el nuevo challenge se separó en otra carpeta del repositorio existente de un challenge anterior presentado a ML para una búsqueda pasada.
+El repositorio de la solución hosteada en cambio es uno nuevo para guardar simplicidad a la hora de hacer el hosting en AppEngine (https://github.com/benjatraverso/Mutants.git) el mismo es privado pero simplemente contiene la webapi expuesta en éste repo.
+
