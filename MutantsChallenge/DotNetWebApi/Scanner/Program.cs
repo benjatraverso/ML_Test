@@ -4,6 +4,7 @@
     using Microsoft.AspNetCore.Hosting;
     using Scanner.Tests;
     using System;
+    using System.IO;
 
     public class Program
     {
@@ -20,7 +21,16 @@
                 Console.WriteLine(c);
             }
 
-            CreateWebHostBuilder(args).Build().Run();
+            var host = new WebHostBuilder()
+            .UseKestrel()
+            .UseContentRoot(Directory.GetCurrentDirectory())
+            .UseIISIntegration()
+            .UseStartup<Startup>()
+            .UseUrls("http://*:8080") // <-----
+            .Build();
+
+            host.Run();
+            //CreateWebHostBuilder(args).Build().Run();
         }
 
 
